@@ -5,7 +5,11 @@ do
  year=$(date +"%Y")
  month=$(date +%b | tr [a-z] [A-Z])
  day=$(date +"%d")
- uptime=$(uptime | awk '{ print $1 }')
+ freq=$(lscpu | grep "CPU MHz" | awk '{ print $3 }')
+ cache=$(free -m | grep "Mem:" | awk '{ print $6}')
+ tasks=$(ps -e | wc -l)
+ uptime=$(uptime -p)
+ uptime="${uptime:3:25}"
  type=$(uname -a | awk '{ print $1 }')
  manufacturer=$(dmidecode -t system | grep Manufacturer | awk '{ print $2}')
  model=$(dmidecode -t system | grep Product)
@@ -14,12 +18,13 @@ do
  chasis_type="${chasis_type:7:40}"
  cpu=$(lscpu | grep "Model name")
  cpu="${cpu:13:55}"
+ used_ram=$(free -m | grep Mem: | awk '{ print $3}')
  p=$(free -m | grep Mem | awk '{ print $4 }')
  p=$(expr $p \* 100)
  per_memf=$(expr $p / $total_mem)
 
- echo "$year    UPTIME    TYPE    POWER"
- echo "$month $day  $uptime  $type   ON"
+ echo "$year    TYPE    POWER    UPTIME"
+ echo "$month $day  $type   ON       $uptime"
  echo "_________________________________"
  printf "\n"
  echo "MANUFACTURER     MODEL     CHASIS"
@@ -32,11 +37,34 @@ do
  echo -n "$cpu_usage% ["
  for i in $(seq 1 ${cpu_usage%.*}); do printf '|'; done
  for i in $(seq 1 $(expr 100 - ${cpu_usage%.*})); do printf ' '; done
- printf ']\n'
- echo -n "Free RAM  : ${per_memf}%   ["
+ printf "]\n"
+ printf "\n"
+ echo "FREQ MHz   TASKS"
+ echo "$freq   $tasks"
+ echo "_________________________________"
+ printf "\n"
+
+ echo "RAM        USING $used_ram OUT OF $total_mem MB"
+ printf "\n"
+
+
+ echo "FREE"
+ echo -n "${per_memf}%   ["
  for i in $(seq 1 $per_memf); do printf '|'; done
  for i in $(seq 1 $(expr 100 - $per_memf)); do printf ' '; done
  printf ']\n'
+ printf "\n"
+
+ echo "CACHE"
+ echo "$cache MB"
+ echo "_________________________________"
+ printf "\n"
+
+ echo "TOP PROCESSESS"
+ printf "\n"
+ echo "%CPU  PID  USER     PROCESS                      %MEM"
+ echo "$(ps -eo pcpu,pid,user,args,%mem --no-headers| sort -t. -nk1,2 -k4,4 -r |head -n 5)"
+
  sleep $refresh_time
  clear
 done
