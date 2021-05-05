@@ -8,6 +8,8 @@ do
  freq=$(lscpu | grep "CPU MHz" | awk '{ print $3 }')
  cache=$(free -m | grep "Mem:" | awk '{ print $6}')
  tasks=$(ps -e | wc -l)
+ read_speed=$(iostat | grep xvda | awk '{ print $3 }')
+ write_speed=$(iostat | grep xvda | awk '{ print $4 }')
  uptime=$(uptime -p)
  uptime="${uptime:3:25}"
  type=$(uname -a | awk '{ print $1 }')
@@ -64,7 +66,14 @@ do
  printf "\n"
  echo "%CPU  PID  USER     PROCESS                      %MEM"
  echo "$(ps -eo pcpu,pid,user,args,%mem --no-headers| sort -t. -nk1,2 -k4,4 -r |head -n 5)"
+ printf "\n"
 
+ echo "READ        WRITE"
+ echo "$read_speed kb/s  $write_speed kb/s"
+ echo "_________________________________"
+ printf "\n"
+
+ echo "NETWORK STATUS"
  sleep $refresh_time
  clear
 done
