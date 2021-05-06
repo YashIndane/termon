@@ -5,3 +5,11 @@
 termon is terminal resource monitoring tool
 
 ![](image.png)
+
+## Installation
+
+run this command -
+
+```
+
+```
