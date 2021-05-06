@@ -11,7 +11,7 @@ termon is terminal resource monitoring tool
 run this command -
 
 ```
-wget https://github.com/YashIndane/termon/blob/main/termon_install.sh ; bash termon_install.sh
+wget  ; bash termon_install.sh
 ```
 
 Use by running `termon`
