@@ -1,5 +1,7 @@
+#!/usr/bin/bash
+
 total_mem=$(free -m | grep Mem | awk '{ print $2}')
-refresh_time=0.5
+refresh_time=0.65
 while :
 do
  year=$(date +"%Y")
@@ -8,6 +10,10 @@ do
  freq=$(lscpu | grep "CPU MHz" | awk '{ print $3 }')
  cache=$(free -m | grep "Mem:" | awk '{ print $6}')
  tasks=$(ps -e | wc -l)
+ packets_received=$(netstat -s | grep "total packets received" | awk '{ print $1}')
+ requests_out=$(netstat -s | grep "requests sent out" | awk '{ print $1}')
+ interface=$(ip -o -4 route show to default | awk '{print $5}')
+ ipv4=$( hostname -I | awk '{ print $1 }')
  read_speed=$(iostat | grep xvda | awk '{ print $3 }')
  write_speed=$(iostat | grep xvda | awk '{ print $4 }')
  uptime=$(uptime -p)
@@ -73,7 +79,25 @@ do
  echo "_________________________________"
  printf "\n"
 
- echo "NETWORK STATUS"
+ echo "NETWORK STATUS     Interface:$interface"
+ printf "\n"
+ echo "STATE   IPv4"
+
+ ping -c 1 -q www.google.com >&/dev/null
+ if [ $? -eq 0 ]; then
+    echo -n "ONLINE"
+ else
+    echo -n "OFFLINE"
+ fi
+
+ echo "  $ipv4"
+ printf "\n"
+
+ echo "PACKETS RECEIVED     REQUESTS OUT"
+ echo "$packets_received                 $requests_out"
+
+
+
  sleep $refresh_time
  clear
 done
